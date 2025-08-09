@@ -41,16 +41,18 @@
       window.location.href = 'login.html';
     });
 
-    // Check login and roles + nav control
     document.addEventListener("DOMContentLoaded", () => {
-      const userRole = localStorage.getItem("userRole");
+      let userRole = localStorage.getItem("userRole");
       const memberUID = localStorage.getItem("memberUID");
+
+      // If not logged in, set as guest
       if (!userRole) {
-        alert("You must login first.");
-        window.location.href = "login.html";
-        return;
+        userRole = "guest";
+        localStorage.setItem("userRole", "guest");
+        alert("You are browsing as a guest. Login for more features.");
       }
 
+      // Control nav visibility
       const navAdd = document.querySelector('nav ul li a[href="add.html"]').parentElement;
       if (userRole === "admin") {
         navAdd.style.display = "block";
@@ -60,7 +62,7 @@
 
       window.loggedInMemberUID = (userRole === "member") ? memberUID : null;
 
-      // Load players and render
+      // Load players (this part still uses localStorage fallback)
       let players = JSON.parse(localStorage.getItem("players")) || [
         {
           name: "Anwar Sadak",
@@ -98,6 +100,7 @@
           } else if (userRole === "member" && memberUID === player.uid) {
             buttonsHTML = `<button onclick="editPlayer('${player.uid}')">Edit</button>`;
           }
+          // Guests get no buttons automatically
 
           card.innerHTML = `
             <img src="${player.image}" alt="${player.name}" />
@@ -134,4 +137,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
