@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Members - Co-Op Core</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Co-Op Core</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="members.html">Members</a></li>
+      <li><a href="add.html">Add</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="#" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Members</h1>
+    <p>Click a player name to view profile</p>
+  </header>
+
+  <section id="membersList" style="padding: 1rem; max-width: 500px; margin: auto;"></section>
+
+  <footer>
+    <p>&copy; 2025 Co-Op Core</p>
+  </footer>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('memberUID');
+      alert('Logged out');
+      window.location.href = 'login.html';
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const userRole = localStorage.getItem("userRole");
+      if (!userRole) {
+        alert("You must login first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const navAdd = document.querySelector('nav ul li a[href="add.html"]').parentElement;
+      if (userRole === "admin") {
+        navAdd.style.display = "block";
+      } else {
+        navAdd.style.display = "none";
+      }
+
+      const membersList = document.getElementById("membersList");
+      const players = JSON.parse(localStorage.getItem("players")) || [];
+
+      if (players.length === 0) {
+        membersList.innerHTML = "<p>No members found.</p>";
+        return;
+      }
+
+      membersList.innerHTML = "";
+
+      players.forEach(player => {
+        const link = document.createElement("a");
+        link.href = `profile.html?uid=${encodeURIComponent(player.uid)}`;
+        link.textContent = player.name;
+        link.className = "member-link";
+        link.style.display = "block";
+        link.style.margin = "10px 0";
+        membersList.appendChild(link);
+      });
+    });
+  </script>
+
+</body>
+</html>

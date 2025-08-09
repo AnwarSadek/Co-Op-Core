@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add/Edit Player - Co-Op Core</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Co-Op Core</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="members.html">Members</a></li>
+      <li><a href="add.html">Add</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="#" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1 id="formTitle">Add New Player</h1>
+  </header>
+
+  <form id="playerForm" style="max-width: 400px; margin: auto;">
+    <input type="text" id="name" placeholder="Player Name" required /><br/>
+    <input type="text" id="uid" placeholder="UID" required /><br/>
+    <input type="text" id="mainChar" placeholder="Main Character" /><br/>
+    <input type="text" id="enkaLink" placeholder="Enka / Aksas Link" /><br/>
+    <input type="text" id="image" placeholder="Profile Image URL" /><br/>
+    <button type="submit">Save Player</button>
+  </form>
+
+  <p id="msg" style="text-align:center; color:lightgreen;"></p>
+
+  <footer>
+    <p>&copy; 2025 Co-Op Core</p>
+  </footer>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('memberUID');
+      alert('Logged out');
+      window.location.href = 'login.html';
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const userRole = localStorage.getItem("userRole");
+      const memberUID = localStorage.getItem("memberUID");
+      if (!userRole) {
+        alert("You must login first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const editUID = urlParams.get("uid");
+      const form = document.getElementById("playerForm");
+      const msg = document.getElementById("msg");
+      const formTitle = document.getElementById("formTitle");
+
+      let players = JSON.parse(localStorage.getItem("players")) || [];
+
+      // Hide Add nav for members
+      const navAdd = document.querySelector('nav ul li a[href="add.html"]').parentElement;
+      if (userRole === "admin") {
+        navAdd.style.display = "block";
+      } else {
+        navAdd.style.display = "none";
+      }
+
+      if (editUID) {
+        const player = players.find(p => p.uid === editUID);
+        if (!player) {
+          alert("Player not found.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        if (userRole === "member" && memberUID !== editUID) {
+          alert("You can only edit your own profile.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        formTitle.textContent = "Edit Player";
+        document.getElementById("name").value = player.name;
+        document.getElementById("uid").value = player.uid;
+        document.getElementById("uid").disabled = true;
+        document.getElementById("mainChar").value = player.mainChar;
+        document.getElementById("enkaLink").value = player.enkaLink;
+        document.getElementById("image").value = player.image;
+        form.querySelector("button[type='submit']").textContent = "Update Player";
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const newPlayerData = {
+          name: document.getElementById("name").value,
+          uid: document.getElementById("uid").value,
+          mainChar: document.getElementById("mainChar").value,
+          enkaLink: document.getElementById("enkaLink").value,
+          image: document.getElementById("image").value || "https://via.placeholder.com/150"
+        };
+
+        if (editUID) {
+          // Update
+          players = players.map(p => p.uid === editUID ? newPlayerData : p);
+          localStorage.setItem("players", JSON.stringify(players));
+          msg.textContent = "Player updated!";
+          setTimeout(() => { window.location.href = "index.html"; }, 1000);
+        } else {
+          // Add (only admin)
+          if (userRole !== "admin") {
+            alert("Only admin can add new players.");
+            return;
+          }
+          // Check duplicate UID
+          if (players.some(p => p.uid === newPlayerData.uid)) {
+            alert("UID already exists.");
+            return;
+          }
+          players.push(newPlayerData);
+          localStorage.setItem("players", JSON.stringify(players));
+          msg.textContent = "Player added!";
+          form.reset();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

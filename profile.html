@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Player Profile - Co-Op Core</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Co-Op Core</div>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="members.html">Members</a></li>
+      <li><a href="add.html">Add</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="#" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Player Profile</h1>
+  </header>
+
+  <section id="profileDetails" style="max-width: 400px; margin: auto; text-align:center;"></section>
+
+  <footer>
+    <p>&copy; 2025 Co-Op Core</p>
+  </footer>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('memberUID');
+      alert('Logged out');
+      window.location.href = 'login.html';
+    });
+
+    function getQueryParam(param) {
+      return new URLSearchParams(window.location.search).get(param);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const profileDetails = document.getElementById("profileDetails");
+      const uid = getQueryParam

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Co-Op Core</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Login to Co-Op Core</h1>
+
+  <form id="loginForm" style="max-width: 300px; margin: auto;">
+    <input type="text" id="username" placeholder="Username" required /><br/>
+    <input type="password" id="password" placeholder="Password (Admin only)" /><br/>
+    <button type="submit">Login</button>
+  </form>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      // Hardcoded admin credentials
+      const adminUser = 'admin';
+      const adminPass = 'admin123';
+
+      if (username === adminUser && password === adminPass) {
+        // Admin login
+        localStorage.setItem('userRole', 'admin');
+        localStorage.removeItem('memberUID');
+        alert('Logged in as Admin');
+        window.location.href = 'index.html';
+      } else {
+        // Member login (no password, just username must match a player uid)
+        let players = JSON.parse(localStorage.getItem('players')) || [];
+        let player = players.find(p => p.uid === username);
+        if (player) {
+          localStorage.setItem('userRole', 'member');
+          localStorage.setItem('memberUID', player.uid);
+          alert(`Logged in as Member: ${player.name}`);
+          window.location.href = 'index.html';
+        } else {
+          alert('Invalid login. For members, enter your UID as username. Admin must enter password.');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
