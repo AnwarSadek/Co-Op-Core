@@ -1,140 +1,159 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Co-Op Core</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-  <nav>
-    <div class="logo">Co-Op Core</div>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="members.html">Members</a></li>
-      <li><a href="add.html">Add</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="#" id="logoutBtn">Logout</a></li>
-    </ul>
-  </nav>
-
-  <header>
-    <h1>Welcome to Co-Op Core</h1>
-    <p>Your Genshin Squad Hub</p>
-  </header>
-
-  <input type="text" id="search" placeholder="Search player..." />
-
-  <section class="profiles" id="profilesContainer"></section>
-
-  <footer>
-    <p>&copy; 2025 Co-Op Core</p>
-  </footer>
-
-  <script>
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('memberUID');
-      alert('Logged out');
-      window.location.href = 'login.html';
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      let userRole = localStorage.getItem("userRole");
-      const memberUID = localStorage.getItem("memberUID");
-
-      // If not logged in, set as guest
-      if (!userRole) {
-        userRole = "guest";
-        localStorage.setItem("userRole", "guest");
-        alert("You are browsing as a guest. Login for more features.");
-      }
-
-      // Control nav visibility
-      const navAdd = document.querySelector('nav ul li a[href="add.html"]').parentElement;
-      if (userRole === "admin") {
-        navAdd.style.display = "block";
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <title>Co-Op Core</title>  
+  <link rel="stylesheet" href="style.css" />  
+</head>  
+<body>  
+  
+  <nav>  
+    <div class="logo">Co-Op Core</div>  
+    <ul>  
+      <li><a href="index.html">Home</a></li>  
+      <li><a href="members.html">Members</a></li>  
+      <li id="navAdd"><a href="add.html">Add</a></li>  
+      <li><a href="about.html">About</a></li>  
+      <li><a href="#" id="loginLogoutBtn">Logout</a></li>  
+    </ul>  
+  </nav>  
+  
+  <header>  
+    <h1>Welcome to Co-Op Core</h1>  
+    <p>Your Genshin Squad Hub</p>  
+  </header>  
+  
+  <input type="text" id="search" placeholder="Search player..." />  
+  
+  <section class="profiles" id="profilesContainer"></section>  
+  
+  <footer>  
+    <p>&copy; 2025 Co-Op Core</p>  
+  </footer>  
+  
+  <script>  
+    function updateLoginLogoutBtn() {
+      const btn = document.getElementById('loginLogoutBtn');
+      const userRole = localStorage.getItem('userRole');
+  
+      if (userRole === 'admin' || userRole === 'member') {
+        btn.textContent = 'Logout';
+        btn.onclick = () => {
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('memberUID');
+          alert('Logged out');
+          window.location.href = 'login.html';
+        };
       } else {
-        navAdd.style.display = "none";
+        btn.textContent = 'Login';
+        btn.onclick = () => {
+          window.location.href = 'login.html';
+        };
       }
-
-      window.loggedInMemberUID = (userRole === "member") ? memberUID : null;
-
-      // Load players (this part still uses localStorage fallback)
-      let players = JSON.parse(localStorage.getItem("players")) || [
-        {
-          name: "Anwar Sadak",
-          uid: "800012345",
-          mainChar: "Wanderer",
-          enkaLink: "https://enka.network/u/800012345/",
-          image: "https://via.placeholder.com/150"
-        },
-        {
-          name: "Simmi",
-          uid: "800098765",
-          mainChar: "Yae Miko",
-          enkaLink: "https://enka.network/u/800098765/",
-          image: "https://via.placeholder.com/150"
-        }
-      ];
-
-      function renderProfiles(list) {
-        const container = document.getElementById("profilesContainer");
-        container.innerHTML = "";
-        if (list.length === 0) {
-          container.innerHTML = "<p>No players found.</p>";
-          return;
-        }
-        list.forEach(player => {
-          const card = document.createElement("div");
-          card.className = "profile-card";
-          let buttonsHTML = "";
-
-          if (userRole === "admin") {
-            buttonsHTML = `
-              <button onclick="editPlayer('${player.uid}')">Edit</button>
-              <button onclick="deletePlayer('${player.uid}')">Delete</button>
-            `;
-          } else if (userRole === "member" && memberUID === player.uid) {
-            buttonsHTML = `<button onclick="editPlayer('${player.uid}')">Edit</button>`;
-          }
-          // Guests get no buttons automatically
-
-          card.innerHTML = `
-            <img src="${player.image}" alt="${player.name}" />
-            <h3>${player.name}</h3>
-            <p><strong>UID:</strong> ${player.uid}</p>
-            <p><strong>Main:</strong> ${player.mainChar}</p>
-            <a href="${player.enkaLink}" target="_blank">View Enka</a>
-            ${buttonsHTML}
-          `;
-          container.appendChild(card);
-        });
-      }
-
-      renderProfiles(players);
-
-      document.getElementById("search").addEventListener("input", e => {
-        const query = e.target.value.toLowerCase();
-        const filtered = players.filter(p => p.name.toLowerCase().includes(query));
-        renderProfiles(filtered);
-      });
-    });
-
-    function editPlayer(uid) {
-      window.location.href = `add.html?uid=${encodeURIComponent(uid)}`;
     }
 
-    function deletePlayer(uid) {
-      if (!confirm("Are you sure you want to delete this player?")) return;
-      let players = JSON.parse(localStorage.getItem("players")) || [];
-      players = players.filter(p => p.uid !== uid);
-      localStorage.setItem("players", JSON.stringify(players));
-      alert("Player deleted.");
-      location.reload();
-    }
-  </script>
-</body>
-</html>
+    document.addEventListener("DOMContentLoaded", () => {  
+      let userRole = localStorage.getItem("userRole");  
+      const memberUID = localStorage.getItem("memberUID");  
+  
+      // If not logged in, set as guest
+      if (!userRole) {  
+        userRole = "guest";  
+        localStorage.setItem("userRole", "guest");  
+        // Show guest alert only once per session  
+        if (!sessionStorage.getItem("guestAlertShown")) {
+          alert("You are browsing as a guest. Login for more features.");
+          sessionStorage.setItem("guestAlertShown", "true");
+        }
+      }  
+  
+      // Show/hide "Add" link for admin only  
+      const navAdd = document.getElementById("navAdd");  
+      if (userRole === "admin") {  
+        navAdd.style.display = "block";  
+      } else {  
+        navAdd.style.display = "none";  
+      }  
+  
+      window.loggedInMemberUID = (userRole === "member") ? memberUID : null;  
+  
+      // Update login/logout button text and behavior  
+      updateLoginLogoutBtn();
+
+      // Load players (using localStorage fallback)  
+      let players = JSON.parse(localStorage.getItem("players")) || [  
+        {  
+          name: "Anwar Sadak",  
+          uid: "800012345",  
+          mainChar: "Wanderer",  
+          enkaLink: "https://enka.network/u/800012345/",  
+          image: "https://via.placeholder.com/150"  
+        },  
+        {  
+          name: "Simmi",  
+          uid: "800098765",  
+          mainChar: "Yae Miko",  
+          enkaLink: "https://enka.network/u/800098765/",  
+          image: "https://via.placeholder.com/150"  
+        }  
+      ];  
+  
+      function renderProfiles(list) {  
+        const container = document.getElementById("profilesContainer");  
+        container.innerHTML = "";  
+        if (list.length === 0) {  
+          container.innerHTML = "<p>No players found.</p>";  
+          return;  
+        }  
+        list.forEach(player => {  
+          const card = document.createElement("div");  
+          card.className = "profile-card";  
+          let buttonsHTML = "";  
+  
+          if (userRole === "admin") {  
+            buttonsHTML = `  
+              <button onclick="editPlayer('${player.uid}')">Edit</button>  
+              <button onclick="deletePlayer('${player.uid}')">Delete</button>  
+            `;  
+          } else if (userRole === "member" && memberUID === player.uid) {  
+            buttonsHTML = `<button onclick="editPlayer('${player.uid}')">Edit</button>`;  
+          }  
+          // Guests get no buttons automatically  
+  
+          card.innerHTML = `  
+            <img src="${player.image}" alt="${player.name}" />  
+            <h3>${player.name}</h3>  
+            <p><strong>UID:</strong> ${player.uid}</p>  
+            <p><strong>Main:</strong> ${player.mainChar}</p>  
+            <a href="${player.enkaLink}" target="_blank">View Enka</a>  
+            ${buttonsHTML}  
+          `;  
+          container.appendChild(card);  
+        });  
+      }  
+  
+      renderProfiles(players);  
+  
+      document.getElementById("search").addEventListener("input", e => {  
+        const query = e.target.value.toLowerCase();  
+        const filtered = players.filter(p => p.name.toLowerCase().includes(query));  
+        renderProfiles(filtered);  
+      });  
+    });  
+  
+    function editPlayer(uid) {  
+      window.location.href = `add.html?uid=${encodeURIComponent(uid)}`;  
+    }  
+  
+    function deletePlayer(uid) {  
+      if (!confirm("Are you sure you want to delete this player?")) return;  
+      let players = JSON.parse(localStorage.getItem("players")) || [];  
+      players = players.filter(p => p.uid !== uid);  
+      localStorage.setItem("players", JSON.stringify(players));  
+      alert("Player deleted.");  
+      location.reload();  
+    }  
+  </script>  
+</body>  
+  </html>
